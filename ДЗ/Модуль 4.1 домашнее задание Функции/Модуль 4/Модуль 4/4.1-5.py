@@ -3,3 +3,13 @@
 качестве параметров. Если границы диапазона перепутаны
 (например, 5 - верхняя граница; 25 - нижняя граница), их нужно
 поменять местами. """
+
+def summ_diapozon (n,x):
+    if n>x:
+        n,x = x,n
+    summ = 0
+    for i in range(n,x+1):
+        summ += i
+    return summ
+
+print(summ_diapozon(7,5))
