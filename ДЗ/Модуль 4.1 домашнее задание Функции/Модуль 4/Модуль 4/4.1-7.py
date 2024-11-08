@@ -6,3 +6,15 @@
 палиндром(первая часть 123, вторая 321, которая после
 переворота становится 123), 546645 — палиндром, а 421987 —
 не палиндром"""
+
+def chek_palindrom (num):
+    revers_num = ""
+    for i in str(num):
+        revers_num = i + revers_num
+    if revers_num == str(num):
+        return True
+    else:
+        return False
+
+print(chek_palindrom(546645))
+print(chek_palindrom(421987))
