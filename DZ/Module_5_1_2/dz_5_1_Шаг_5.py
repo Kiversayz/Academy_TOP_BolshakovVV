@@ -34,7 +34,7 @@ print(f"\nВаш ранг:\n{result}")
 функции (шаг 5)
 основной код (шаг 5 черным шрифтом)
 """
-import словари_базовые_5_1_Шаг_0 as glossary
+import dz_5_1_Шаг_0 as glossary
 import json
 import os
 
