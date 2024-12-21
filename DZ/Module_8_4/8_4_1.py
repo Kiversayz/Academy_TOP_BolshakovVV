@@ -234,7 +234,7 @@ class Сomputer():
                 power_one_divase = math.ceil(self.max_sum_energy_consumption/4)
                 print(f'Успех! На каждый девайс перераспределенно напряжение по {power_one_divase} Вт.')
                 return True
-            elif powerUnit.max_power > sum_energy_consumption:
+            elif powerUnit.max_power > self.max_sum_energy_consumption:
                 power_one_divase = math.ceil(self.max_sum_energy_consumption/4)
                 print(f'Успех! Система запустилась в эконом режиме, не все девайсы работоспособны')
                 print(f'    -на каждый девайс перераспределенно напряжение по {power_one_divase} Вт.')
