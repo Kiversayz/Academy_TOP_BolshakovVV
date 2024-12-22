@@ -38,11 +38,45 @@ import math
 
 6. Видеокарта (модель, объем памяти) + метод: вывести изображение на экран.
 """
+
+class Device:
+    """Базовый класс для устройств."""
+    def __init__(self, energy_consumption=0):
+        self.energy_consumption = energy_consumption
+
+class StorageDevice(Device):
+    """Базовый класс для устройств хранения данных с учетом ограничения памяти."""
+    def __init__(self, memory=0, energy_consumption=0):
+        super().__init__(energy_consumption)
+        self.memory = memory  # Максимальный объем памяти
+        self.data = []        # Хранилище данных
+
+    def download_data(self, data):
+        """Сохраняет данные в устройство, если хватает места."""
+        if len(self.data) < self.memory:
+            self.data.append(data)
+            print(f"Данные '{data}' загружены в хранилище.")
+        else:
+            print(f"Хранилище заполнено. Данные '{data}' не могут быть записаны.")
+
+    def remove_data(self, data):
+        """Удаляет данные из устройства."""
+        if data in self.data:
+            self.data.remove(data)
+            print(f"Данные '{data}' удалены из хранилища.")
+        else:
+            print(f"Данные '{data}' не найдены в хранилище.")
+
+    def get_available_space(self):
+        """Возвращает количество оставшихся свободных мест в хранилище."""
+        return self.memory - len(self.data)
+
+
 #1. Блок питания (мощность в ваттах) + метод подать напряжение.
 
 class PowerUnit:
-    
-    def __init__(self,max_power):
+    """ Блок питания. """
+    def __init__(self,max_power=0):
         self.max_power = max_power
         self.state_power = False
     
@@ -66,97 +100,104 @@ class PowerUnit:
 # перераспределить напряжение от БП по компонентам.
 class Motherboard:
     
-    def __init__(self,socket_type,ram_slots,ssd_slots):
+    def __init__(self,socket_type='None',ram_slots=0,ssd_slots=0):
         self.socket_type = socket_type
         self.ram_slots = ram_slots
         self.ssd_slots = ssd_slots
     
-    def motherboard_power_unit(self,sum_power,nums_devase):
+    def distribute_power(self,sum_power,nums_devase):
         power_one_divase = sum_power/nums_devase
         print(f'На каждый девайс перераспределенно напряжение по {power_one_divase} Вт.')
         return math.ceil(power_one_divase)
         
 #3. Центральный процессор (кол-во ядер, мощность процессора, потребляемая мощность в ваттах) + метод активировать турбо режим.
 
-class Cpu:
+class Cpu(Device):
     
-    def __init__(self,cores,processor_power,energy_consumption):
+    def __init__(self,cores=0,processor_power=0,energy_consumption=0):
+        super().__init__(energy_consumption)
         self.cores = cores
         self.processor_power = processor_power
         self.nominal_energy_consumption = energy_consumption
-        self.energy_consumption = energy_consumption
     
     def on_turbo_mode_cpu(self):
-        naminal = self.energy_consumption
         self.energy_consumption = math.ceil(self.nominal_energy_consumption*1.75) 
-        print(f'Процессор работает в турбо режиме, энерго потребление вырасло с {naminal} до {self.energy_consumption} Вт.')
+        print(f'Процессор работает в турбо режиме, энерго потребление вырасло с {self.nominal_energy_consumption} до {self.energy_consumption} Вт.')
         return self.energy_consumption
     
     def off_turbo_mode_cpu(self):
-        naminal = self.energy_consumption
         self.energy_consumption = self.nominal_energy_consumption 
-        print(f'Процессор работает в стандартном режиме, энерго потребление снизелось с {naminal} до {self.energy_consumption} Вт.')
+        print(f'Процессор работает в стандартном режиме, энерго потребление снизелось с {math.ceil(self.nominal_energy_consumption*1.75)} до {self.nominal_energy_consumption} Вт.')
         return self.energy_consumption
 
 #4. Оперативная память (кол-во памяти на одно гнездо, частота работы памяти) + методы: загрузить данные, выгрузить данные.
 
-class Ram:
-    
-    def __init__(self,amount_memory,frequency,energy_consumption):
-        self.amount_memory = amount_memory
+class Ram(StorageDevice):
+    """Класс для оперативной памяти."""
+    def __init__(self, memory=0, frequency=0, energy_consumption=0):
+        super().__init__(memory, energy_consumption)
         self.frequency = frequency
-        self.energy_consumption = energy_consumption
-        self.ram_data = []
     
-    def download_ram_data(self,ram_data):
-        """ Сохраняем данные на RAM накопитель в массив """
-        if len(ram_data)<=self.amount_memory:
-            self.ram_data.append(ram_data)
-            print(f'"{ram_data}" было загруженно на RAM накопитель.')
-            return self.ram_data
+    def download_data(self, data):
+        """Сохраняет данные в RAM."""
+        if len(self.data) < self.memory:
+            self.data.append(data)
+            print(f"Данные '{data}' загружены в RAM.")
         else:
-            print(f'Память RAM перегружена, запись "{ram_data}" не возможна')
-            return self.ram_data
+            print(f"RAM заполнен. Данные '{data}' не могут быть записаны.")
     
-    def remove_ram_data(self,ram_data):
-        """ Удаляем данные c RAM накопитель в массив """
-        if ram_data in self.ram_data:
-            self.ram_data.remove(ram_data)
-            print(f'"{ram_data}" было удалено  RAM накопитель.')
-            return self.ram_data
-        print(f'"{ram_data}" не найден на  RAM накопителе')
-        return self.ram_data
+    def remove_data(self, data):
+        """Удаляет данные из RAM."""
+        if data in self.data:
+            self.data.remove(data)
+            print(f"Данные '{data}' удалены из RAM.")
+        else:
+            print(f"Данные '{data}' не найдены в RAM.")
+    
+    def get_specifications(self):
+        return (
+            f"Оперативная память:\n"
+            f"  Объем: {self.memory} ГБ\n"
+            f"  Частота: {self.frequency} МГц\n"
+            f"  Энергопотребление: {self.energy_consumption} Вт\n"
+        )
 
 #5. SSD-накопитель (объем памяти) + методы: загрузить данные, выгрузить данные.
 
-class Ssd:
+class Ssd(StorageDevice):
+    """Класс для SSD-накопителя."""
+    def __init__(self, memory=0, energy_consumption=0):
+        super().__init__(memory, energy_consumption)
     
-    def __init__(self,memory,energy_consumption):
-        self.memory = memory
-        self.energy_consumption = energy_consumption
-        self.ssd_data = []
+    def download_data(self, data):
+        """Сохраняет данные в SSD."""
+        if len(self.data) < self.memory:
+            self.data.append(data)
+            print(f"Данные '{data}' загружены в SSD.")
+        else:
+            print(f"SSD заполнен. Данные '{data}' не могут быть записаны.")
     
-    def download_ssd_data(self,ssd_data):
-        """ Сохраняем данные на SSD накопитель в массив """
-        self.ssd_data.append(ssd_data)
-        print(f'"{ssd_data}" было загруженно на SSD накопитель.')
-        return self.ssd_data
+    def remove_data(self, data):
+        """Удаляет данные из SSD."""
+        if data in self.data:
+            self.data.remove(data)
+            print(f"Данные '{data}' удалены из SSD.")
+        else:
+            print(f"Данные '{data}' не найдены в SSD.")
     
-    def remove_ssd_data(self,ssd_data):
-        """ Удаляем данные с SSD накопитель в массив """
-        if ssd_data in self.ssd_data:
-            self.ssd_data.remove(ssd_data)
-            print(f'"{ssd_data}" было удалено с SSD накопитель.')
-            return ssd_data
-        print(f'"{ssd_data}" не найден на SSD накопителе')
-        return self.ssd_data
-
+    def get_specifications(self):
+        return (
+            f"SSD-накопитель:\n"
+            f"  Объем: {self.memory} ГБ\n"
+            f"  Энергопотребление: {self.energy_consumption} Вт\n"
+        )
 
 #6. Видеокарта (модель, объем памяти) + метод: вывести изображение на экран.
 
-class VideoCard:
+class VideoCard(Device):
     
-    def __init__(self,video_model, video_memory,energy_consumption):
+    def __init__(self,video_model='', video_memory=0,energy_consumption=0):
+        super().__init__(energy_consumption)
         self.video_model = video_model
         self.video_memory = video_memory
         self.energy_consumption = energy_consumption
@@ -181,17 +222,33 @@ class VideoCard:
 #Реализовать данный компьютер при помощи и
 # множественного наследования и композиции
 
-class Сomputer():
+class Сomputer:
 
-    def __init__(self, powerUnit, motherboard, cpu, ram, ssd, videoCard):
-        self.powerUnit = powerUnit
+
+    def __init__(self, power_unit, motherboard, cpu, ram, ssd, video_card):
+        self.power_unit = power_unit
         self.motherboard = motherboard
         self.cpu = cpu
         self.ram = ram
         self.ssd = ssd
-        self.videoCard = videoCard
-        self.sum_energy_consumption = int(cpu.energy_consumption) + int(ram.energy_consumption) + int(ssd.energy_consumption) + int(videoCard.energy_consumption)
-        self.max_sum_energy_consumption = int(cpu.energy_consumption) + int(ram.energy_consumption)*int(motherboard.ram_slots) + int(ssd.energy_consumption)*int(motherboard.ssd_slots) + int(videoCard.energy_consumption)
+        self.video_card = video_card
+        self.update_energy_consumption()
+
+    def update_energy_consumption(self):
+        """Обновляет минимальное и максимальное энергопотребление системы."""
+        self.sum_energy_consumption = (
+            self.cpu.energy_consumption +
+            self.ram.energy_consumption +
+            self.ssd.energy_consumption +
+            self.video_card.energy_consumption
+        )
+        self.max_sum_energy_consumption = (
+            self.cpu.energy_consumption +
+            self.ram.energy_consumption * self.motherboard.ram_slots +
+            self.ssd.energy_consumption * self.motherboard.ssd_slots +
+            self.video_card.energy_consumption
+        )
+
     
     def computer_specifications(self):
         return (
@@ -201,21 +258,21 @@ class Сomputer():
             f'      Кол-во слотов для RAM памяти: {self.motherboard.ram_slots} шт.\n'
             f'      Кол-во слотов для SSD памяти: {self.motherboard.ssd_slots} шт.\n'
             f'2. Блок питания:\n'
-            f'      Мощность: {self.powerUnit.max_power} Вт.\n'
+            f'      Мощность: {self.power_unit.max_power} Вт.\n'
             f'3. Процессор:\n'
             f'      Кол-во ядер: {self.cpu.cores} шт.\n'
             f'      Кол-во потоков: {self.cpu.cores*2} шт.\n'
             f'      Частота работы ядра: {self.cpu.processor_power} ГГц.\n'
             f'      Потребление: {self.cpu.energy_consumption} Вт.\n'
             f'4. Видеокарта:\n'
-            f'      Модель: {self.videoCard.video_model}\n'
-            f'      Объем памяти: {self.videoCard.video_memory} Гб.\n'
-            f'      Потребление: {self.videoCard.energy_consumption} Вт.\n'
+            f'      Модель: {self.video_card.video_model}\n'
+            f'      Объем памяти: {self.video_card.video_memory} Гб.\n'
+            f'      Потребление: {self.video_card.energy_consumption} Вт.\n'
             f'5. Оперативная память:\n'
-            f'      Объем памяти (1 шт.): {self.ram.amount_memory} Гб.\n'
+            f'      Объем памяти (1 шт.): {self.ram.memory} Гб.\n'
             f'      Частота работы: {self.ram.frequency} МГц.\n'
             f'      Потребление(1 шт.): {self.ram.energy_consumption} Вт.\n'
-            f'      Объем памяти с учетом возможности материнской платы ({self.motherboard.ram_slots} шт.): {self.motherboard.ram_slots*self.ram.amount_memory} Гб.\n'
+            f'      Объем памяти с учетом возможности материнской платы ({self.motherboard.ram_slots} шт.): {self.motherboard.ram_slots*self.ram.memory} Гб.\n'
             f'      Потребление с учетом возможности материнской платы ({self.motherboard.ram_slots} шт.): {self.motherboard.ram_slots*self.ram.energy_consumption} Вт.\n'
             f'6. Встроенная память SSD:\n'
             f'      Объем памяти (1 шт.): {self.ssd.memory} Гб.\n'
@@ -223,135 +280,141 @@ class Сomputer():
             f'      Объем памяти с учетом возможности материнской платы ({self.motherboard.ssd_slots} шт.): {self.motherboard.ssd_slots*self.ssd.memory} Гб.\n'
             f'      Потребление с учетом возможности материнской платы ({self.motherboard.ssd_slots} шт.): {self.motherboard.ssd_slots*self.ssd.energy_consumption} Вт.\n'
             f'Сводка по энергопотреблению:\n'
-            f'      Мощность от блока питания: {self.powerUnit.max_power} Вт.\n'
+            f'      Мощность от блока питания: {self.power_unit.max_power} Вт.\n'
             f'      Минимальная потребляемая мощьность: {self.sum_energy_consumption} Вт.\n'
             f'      Максимальная потребляемая мощьность: {self.max_sum_energy_consumption} Вт.\n'
         )
     
-    def motherboard_power_unit(self):
-        if powerUnit.state_power:
-            if powerUnit.max_power > self.max_sum_energy_consumption:    
-                power_one_divase = math.ceil(self.max_sum_energy_consumption/4)
-                print(f'Успех! На каждый девайс перераспределенно напряжение по {power_one_divase} Вт.')
-                return True
-            elif powerUnit.max_power > sum_energy_consumption:
-                power_one_divase = math.ceil(self.max_sum_energy_consumption/4)
-                print(f'Успех! Система запустилась в эконом режиме, не все девайсы работоспособны')
-                print(f'    -на каждый девайс перераспределенно напряжение по {power_one_divase} Вт.')
-                return True
-            else:
-                print('Провал! К сожелению системе не хватает питания, установите компоненты с меньшей энерго потреблением.')
-                return False
+    def is_power_sufficient(self):
+        """Проверяет, хватает ли мощности блока питания для работы системы."""
+        return self.power_unit.max_power >= self.sum_energy_consumption
+    
+    def distribute_power(self):
+        """Проверяет, может ли система работать на текущем уровне энергопотребления."""
+        if not self.power_unit.state_power:
+            print("Питание выключено. Включите блок питания.")
+            return False
+        
+        if self.is_power_sufficient():
+            print("Система работает нормально. Мощности достаточно.")
+            return True
         else:
-            print(f'Для начала включите блок питания')
+            print("Недостаточно мощности блока питания для работы системы.")
             return False
     
-    
     def on_state_power(self):
-        powerUnit.on_state_power()
+        self.power_unit.on_state_power()
+        if self.distribute_power():
+            return True
+        else:
+            self.power_unit.off_state_power()
+            return False
     
     def off_state_power(self):
-        powerUnit.off_state_power()
+        self.power_unit.off_state_power()
         self.off_display_image()
     
     def on_display_image(self):
-        if powerUnit.state_power:
-            videoCard.on_display_image()
+        if self.power_unit.state_power:
+            self.video_card.on_display_image()
         else:
             print(f'Для начала включите блок питания')
     
     def off_display_image(self):
-        if powerUnit.state_power:
-            videoCard.off_display_image()
+        if self.power_unit.state_power:
+            self.video_card.off_display_image()
         else:
             print(f'Питание отсутсвует, вывод изображения уже отсутсвует')
     
     def download_ram_data(self,ram_data):
         """ Сохраняем данные на RAM накопитель в массив """
-        if powerUnit.state_power:    
-            self.ram.download_ram_data(ram_data)
+        if self.power_unit.state_power:    
+            self.ram.download_data(ram_data)
         else:
             print(f'Питание отсутсвует, запись не возможна')
     
     def remove_ram_data(self,ram_data):
         """ Удаляем данные c RAM накопитель в массив """
-        if powerUnit.state_power: 
-            self.ram.remove_ram_data(ram_data)
+        if self.power_unit.state_power: 
+            self.ram.remove_data(ram_data)
         else:
             print(f'Питание отсутсвует, запись не возможна')
     
     def download_ssd_data(self,ssd_data):
         """ Сохраняем данные на SSD накопитель в массив """
-        if powerUnit.state_power: 
-            self.ssd.download_ssd_data(ssd_data)
+        if self.power_unit.state_power: 
+            self.ssd.download_data(ssd_data)
         else:
             print(f'Питание отсутсвует, запись не возможна')
     
     def remove_ssd_data(self,ssd_data):
         """ Удаляем данные с SSD накопитель в массив """
-        if powerUnit.state_power: 
-            self.ssd.remove_ssd_data(ssd_data)
+        if self.power_unit.state_power: 
+            self.ssd.remove_data(ssd_data)
         else:
             print(f'Питание отсутсвует, запись не возможна')
     
     def on_turbo_mode_cpu(self):
-        if powerUnit.state_power: 
-            cpu.on_turbo_mode_cpu()
-            if self.motherboard_power_unit():
-                print('Турбо режим успешно запущен')
+        if self.power_unit.state_power: 
+            self.cpu.on_turbo_mode_cpu()
+            if self.distribute_power():
+                print(f'Потребление системы достаточно!')
+                return True
             else:
-                self.off_turbo_mode_cpu(self)
+                print(f'!Потребление системы не достаточно')
+                return False
         else:
             print(f'Питание отсутсвует, опция недоступна')
     
     def off_turbo_mode_cpu(self):
-        if powerUnit.state_power: 
-            cpu.off_turbo_mode_cpu()
+        if self.power_unit.state_power: 
+            self.cpu.off_turbo_mode_cpu()
+            self.distribute_power()
         else:
             print(f'Питание отсутсвует, опция недоступна')
 
 
-powerUnit = PowerUnit(700)
+power_unit = PowerUnit(700)
 motherboard = Motherboard('AM4', 4, 1)
 cpu = Cpu(8,3.6,65)
 ram = Ram(8,3600,5)
 ssd = Ssd(1000, 5)
-videoCard = VideoCard('GeForce RTX 4060 Ti', 8, 500)
+video_card = VideoCard('GeForce RTX 4060 Ti', 8, 500)
 
 print('Вкл/Выкл трансляции изображения')
-videoCard.off_display_image()
-videoCard.on_display_image()
-videoCard.off_display_image()
+video_card.off_display_image()
+video_card.on_display_image()
+video_card.off_display_image()
 print()
 
 print('Сохранение и удаление на SSD')
-ssd.download_ssd_data('Привет, Мир!')
-ssd.download_ssd_data('Как дела, Мир?')
-ssd.remove_ssd_data('Привет, Мир!')
-ssd.remove_ssd_data('Как дела, Мир?')
-ssd.remove_ssd_data('Nan')
+ssd.download_data('Привет, Мир!')
+ssd.download_data('Как дела, Мир?')
+ssd.remove_data('Привет, Мир!')
+ssd.remove_data('Как дела, Мир?')
+ssd.remove_data('Nan')
 print()
 
 print('Сохранение и удаление на RAM')
-ram.download_ram_data('Привет, оперативка!')
-ram.download_ram_data('Как дела, оперативка?')
-ram.remove_ram_data('Привет, оперативка!')
-ram.remove_ram_data('Как дела, оперативка?')
-ram.remove_ram_data('Nan')
+ram.download_data('Привет, оперативка!')
+ram.download_data('Как дела, оперативка?')
+ram.remove_data('Привет, оперативка!')
+ram.remove_data('Как дела, оперативка?')
+ram.remove_data('Nan')
 print()
 
-powerUnit.on_state_power()
-powerUnit.off_state_power()
+power_unit.on_state_power()
+power_unit.off_state_power()
 print()
 
-motherboard.motherboard_power_unit(800,5)
+motherboard.distribute_power(800,5)
 print()
 
 cpu.on_turbo_mode_cpu()
 cpu.off_turbo_mode_cpu()
 
 print()
-computer = Сomputer(powerUnit, motherboard, cpu, ram, ssd, videoCard)
+computer = Сomputer(power_unit, motherboard, cpu, ram, ssd, video_card)
 
 print('Получаем информацию о сборке!')
 print(computer.computer_specifications())
@@ -364,7 +427,7 @@ computer.off_display_image()
 computer.off_state_power()
 computer.on_state_power()
 computer.download_ram_data('Привет, оперативка!')
-computer.motherboard_power_unit()
+computer.distribute_power()
 computer.remove_ram_data('Привет, оперативка!')
 computer.remove_ram_data('Привет!')
 computer.download_ssd_data('Тук-Тук')
