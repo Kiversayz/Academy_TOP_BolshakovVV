@@ -31,5 +31,4 @@ class LinkedList:
             self.head.data = data
             return f'new_data = {self.head.data}'
         current_node = self.head
-        while current_node and current_node.next_node:
-            if current_node
+        
