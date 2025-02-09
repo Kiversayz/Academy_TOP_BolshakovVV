@@ -1,0 +1,12 @@
+{
+    "name": "а",
+    "level": "легкий",
+    "answers": {
+        "family": true,
+        "hand": false,
+        "people": false,
+        "evening": false,
+        "minute": false
+    },
+    "level_result": "Так себе"
+}

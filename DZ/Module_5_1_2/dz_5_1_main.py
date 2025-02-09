@@ -26,43 +26,27 @@
 Улучшит читаемость кода, ибо нельзя в 1м файле смешивать все со
 всем.
 """
-import dz_5_1_Шаг_5 as funs
+import dz_5_1_functions
+а
+# Загружаем данные из JSON (DZ\Module_5_1_2\data.json)
+data = dz_5_1_functions.load_data()
+
+# Запрашиваем имя пользователя
+name_user = input("Введите свое имя: ").strip()
+if not name_user:
+    name_user = "unknown_user"
+
+# Запрашиваем уровень сложности
+level_input = input("Выберите уровень сложности (легкий, средний, тяжелый): ").strip()
+words = dz_5_1_functions.get_user_level(level_input, data)
+
+# Проводим тестирование
+answers = dz_5_1_functions.ask_questions(words)
+
+# Оцениваем результат
+result = dz_5_1_functions.evaluate_results(answers, data)
+
+# Сохраняем результат в JSON
+dz_5_1_functions.save_results(name_user, level_input, answers, result)
 
 
-print('Основной код - запущен.')
-
-funs.fun_1()
-
-""" 
-user_lvl = input("Выберите уровень сложности \nлегкий, средний, сложный.\n").lower()
-test_words = функция
-test_answers = функция
-result = функция
-print(f"\nВаш ранг:\n{result}")
-
-"""
-
-#Для начала программа спрашивает имя пользователя и запоминает его,
-# это нам будет необходимо для записи его результатов.
-
-name_user = input('Введите свое Имя: ') #это будет использоваться для указания имени файла
-
-#user_lvl = input("Выберите уровень сложности \nлегкий, средний, сложный.\n").lower()
-difficulty_level = input('Введите желаемый уровень сложности теста (легкий, средний, тяжелый):\n')
-
-#test_words = функция
-test_words = funs.get_user_level(difficulty_level)
-#print(test_words)А
-
-#test_answers = функция
-test_answers = funs.base_program(test_words)
-#print(test_answers)
-
-#result = функция + print(f"\nВаш ранг:\n{result}")
-result = funs.get_result(test_answers)
-
-#Записываем все в файл JSON
-funs.save_result_user_name(name_user,test_words,test_answers,result)
-
-#показать содержимое JSON
-#print(funs.open_result_user_name(name_user))
